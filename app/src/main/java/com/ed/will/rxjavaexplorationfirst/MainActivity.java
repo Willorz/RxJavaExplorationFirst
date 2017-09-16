@@ -8,9 +8,11 @@ import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -29,7 +31,27 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void demo4() {
-        
+        Observable<Integer> observable=Observable.create(new ObservableOnSubscribe<Integer>() {
+            @Override
+            public void subscribe(@NonNull ObservableEmitter<Integer> e) throws Exception {
+                Log.d(TAG,"Observable thread is:"+Thread.currentThread().getName());
+                Log.d(TAG,"emit1");
+                e.onNext(1);
+            }
+        });
+
+        Consumer<Integer> consumer=new Consumer<Integer>() {
+            @Override
+            public void accept(Integer integer) throws Exception {
+                Log.d(TAG,"Observer thread is:"+Thread.currentThread().getName());
+                Log.d(TAG,"onNext:"+integer);
+            }
+        };
+
+        observable.subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(consumer);
+
     }
 
     private void demo3() {
